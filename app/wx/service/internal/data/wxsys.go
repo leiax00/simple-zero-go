@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "github.com/simple-zero-go/api/wx/service/v1"
-	_const "github.com/simple-zero-go/app/wx/service/const"
 	"github.com/simple-zero-go/app/wx/service/internal/biz"
+	_const "github.com/simple-zero-go/app/wx/service/internal/const"
 	"time"
 )
 
