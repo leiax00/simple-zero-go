@@ -11,5 +11,11 @@ data:
     source: root:root@tcp(127.0.0.1:3306)/test
   redis:
     addr: 127.0.0.1:6379
+    password: ''
+    db: 1
     read_timeout: 0.2s
     write_timeout: 0.2s
+wx:
+  serverToken: ${SZ_WX_SERVER_TOKEN:lax4832}
+  appid: ${SZ_WX_APPID:wx8253ecdcdaf841f5}
+  secret: ${SZ_WX_SECRET:9f77cb018789bbdd5d268a346628caec}

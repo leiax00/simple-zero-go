@@ -9,7 +9,9 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/simple-zero-go/app/wx/service/internal/biz"
 	"github.com/simple-zero-go/app/wx/service/internal/conf"
+	"github.com/simple-zero-go/app/wx/service/internal/data"
 	"github.com/simple-zero-go/app/wx/service/internal/server"
 	"github.com/simple-zero-go/app/wx/service/internal/service"
 )
@@ -17,11 +19,21 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	wxSysService := service.NewWxSysService()
+func wireApp(confServer *conf.Server, confData *conf.Data, wxConf *conf.WxConf, logger log.Logger) (*kratos.App, func(), error) {
+	client := server.NewHttpClient()
+	redisClient := server.NewRedisClient(confData, logger)
+	bizBiz := biz.NewBiz(client, redisClient, logger)
+	dataData, cleanup, err := data.NewData(redisClient, logger)
+	if err != nil {
+		return nil, nil, err
+	}
+	wxSysRepo := data.NewWxSysRepo(dataData, logger)
+	wxSysUseCase := biz.NewWxSysUseCase(bizBiz, logger, wxConf, wxSysRepo)
+	wxSysService := service.NewWxSysService(wxSysUseCase, logger)
 	httpServer := server.NewHTTPServer(confServer, wxSysService, logger)
 	grpcServer := server.NewGRPCServer(confServer, wxSysService, logger)
 	app := newApp(logger, httpServer, grpcServer)
 	return app, func() {
+		cleanup()
 	}, nil
 }

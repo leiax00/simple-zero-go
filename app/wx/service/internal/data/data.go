@@ -2,22 +2,30 @@ package data
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-redis/redis/v8"
 	"github.com/google/wire"
-	"github.com/simple-zero-go/app/wx/service/internal/conf"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData)
+var ProviderSet = wire.NewSet(NewData, NewWxSysRepo)
 
 // Data .
 type Data struct {
-	// TODO wrapped database client
+	log *log.Helper
+	rc  *redis.Client
 }
 
 // NewData .
-func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
+func NewData(c *redis.Client, logger log.Logger) (*Data, func(), error) {
+	l := log.NewHelper(log.With(logger, "module", "data"))
 	cleanup := func() {
-		log.NewHelper(logger).Info("closing the data resources")
+		l.Info("closing the data resources")
+		defer func(c *redis.Client) {
+			_ = c.Close()
+		}(c)
 	}
-	return &Data{}, cleanup, nil
+	return &Data{
+		log: l,
+		rc:  c,
+	}, cleanup, nil
 }

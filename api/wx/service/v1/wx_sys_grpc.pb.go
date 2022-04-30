@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.20.1
-// source: wx_sys.proto
+// source: api/wx/service/v1/wx_sys.proto
 
 package v1
 
@@ -23,6 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WxSysClient interface {
 	AuthServer(ctx context.Context, in *AuthServerReq, opts ...grpc.CallOption) (*AuthServerResp, error)
+	GetAccessToken(ctx context.Context, in *TokenReq, opts ...grpc.CallOption) (*TokenReply, error)
+	CreateMenu(ctx context.Context, in *Menu, opts ...grpc.CallOption) (*CommonReply, error)
 }
 
 type wxSysClient struct {
@@ -42,11 +44,31 @@ func (c *wxSysClient) AuthServer(ctx context.Context, in *AuthServerReq, opts ..
 	return out, nil
 }
 
+func (c *wxSysClient) GetAccessToken(ctx context.Context, in *TokenReq, opts ...grpc.CallOption) (*TokenReply, error) {
+	out := new(TokenReply)
+	err := c.cc.Invoke(ctx, "/wx.service.v1.WxSys/GetAccessToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *wxSysClient) CreateMenu(ctx context.Context, in *Menu, opts ...grpc.CallOption) (*CommonReply, error) {
+	out := new(CommonReply)
+	err := c.cc.Invoke(ctx, "/wx.service.v1.WxSys/CreateMenu", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WxSysServer is the server API for WxSys service.
 // All implementations must embed UnimplementedWxSysServer
 // for forward compatibility
 type WxSysServer interface {
 	AuthServer(context.Context, *AuthServerReq) (*AuthServerResp, error)
+	GetAccessToken(context.Context, *TokenReq) (*TokenReply, error)
+	CreateMenu(context.Context, *Menu) (*CommonReply, error)
 	mustEmbedUnimplementedWxSysServer()
 }
 
@@ -56,6 +78,12 @@ type UnimplementedWxSysServer struct {
 
 func (UnimplementedWxSysServer) AuthServer(context.Context, *AuthServerReq) (*AuthServerResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AuthServer not implemented")
+}
+func (UnimplementedWxSysServer) GetAccessToken(context.Context, *TokenReq) (*TokenReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAccessToken not implemented")
+}
+func (UnimplementedWxSysServer) CreateMenu(context.Context, *Menu) (*CommonReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateMenu not implemented")
 }
 func (UnimplementedWxSysServer) mustEmbedUnimplementedWxSysServer() {}
 
@@ -88,6 +116,42 @@ func _WxSys_AuthServer_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WxSys_GetAccessToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WxSysServer).GetAccessToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wx.service.v1.WxSys/GetAccessToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WxSysServer).GetAccessToken(ctx, req.(*TokenReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WxSys_CreateMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Menu)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WxSysServer).CreateMenu(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wx.service.v1.WxSys/CreateMenu",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WxSysServer).CreateMenu(ctx, req.(*Menu))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WxSys_ServiceDesc is the grpc.ServiceDesc for WxSys service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -99,7 +163,15 @@ var WxSys_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "AuthServer",
 			Handler:    _WxSys_AuthServer_Handler,
 		},
+		{
+			MethodName: "GetAccessToken",
+			Handler:    _WxSys_GetAccessToken_Handler,
+		},
+		{
+			MethodName: "CreateMenu",
+			Handler:    _WxSys_CreateMenu_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "wx_sys.proto",
+	Metadata: "api/wx/service/v1/wx_sys.proto",
 }

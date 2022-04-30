@@ -16,6 +16,11 @@ service WxSys {
       response_body: 'echostr'
     };
   }
+
+  rpc GetAccessToken(TokenReq) returns (TokenReply);
+
+  rpc CreateMenu(Menu) returns (CommonReply);
+
 }
 
 message AuthServerReq {
@@ -26,4 +31,33 @@ message AuthServerReq {
 }
 message AuthServerResp {
   string echostr = 1;
+}
+
+message TokenReq {
+  string grant_type = 1;
+  string appid = 2;
+  string secret = 3;
+}
+
+message TokenReply {
+  string access_token = 1;
+  int64 expires_in = 2;
+}
+
+message Menu {
+  string type = 1;
+  string name = 2;
+  string key = 3;
+  string url = 4;
+  string media_id = 5;
+  string appid = 6;
+  string pagepath = 7;
+  string article_id = 8;
+  repeated Menu button = 9;
+  repeated Menu sub_button = 10;
+}
+
+message CommonReply {
+  int64 errcode = 1;
+  string errmsg = 2;
 }

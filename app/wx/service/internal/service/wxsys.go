@@ -2,30 +2,35 @@ package service
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
+	"github.com/go-kratos/kratos/v2/log"
 	wxPb "github.com/simple-zero-go/api/wx/service/v1"
-	"sort"
-	"strings"
+	"github.com/simple-zero-go/app/wx/service/internal/biz"
 )
 
 type WxSysService struct {
 	wxPb.UnimplementedWxSysServer
+
+	uc  *biz.WxSysUseCase
+	log *log.Helper
 }
 
-func NewWxSysService() *WxSysService {
-	return &WxSysService{}
+func NewWxSysService(uc *biz.WxSysUseCase, logger log.Logger) *WxSysService {
+	return &WxSysService{
+		uc:  uc,
+		log: log.NewHelper(log.With(logger, "module", "service/wxSys")),
+	}
 }
 
 func (s *WxSysService) AuthServer(ctx context.Context, req *wxPb.AuthServerReq) (*wxPb.AuthServerResp, error) {
-	token := "lax4832"
-	tmpArray := []string{req.Nonce, req.Timestamp, token}
-	sort.Strings(tmpArray)
-	h := sha1.New()
-	h.Write([]byte(strings.Join(tmpArray, "")))
-	calcVal := hex.EncodeToString(h.Sum(nil))
-	if calcVal == req.Signature {
-		return &wxPb.AuthServerResp{Echostr: req.Echostr}, nil
-	}
-	return &wxPb.AuthServerResp{Echostr: ""}, nil
+	str, err := s.uc.AuthServer(ctx, req)
+	return &wxPb.AuthServerResp{Echostr: str}, err
+}
+
+func (s *WxSysService) GetAccessToken(ctx context.Context, tokenObj *wxPb.TokenReq) (*wxPb.TokenReply, error) {
+	return s.uc.GetAccessToken(ctx, tokenObj)
+}
+
+func (s *WxSysService) CreateMenu(ctx context.Context, menu *wxPb.Menu) (*wxPb.CommonReply, error) {
+	//TODO implement me
+	panic("implement me")
 }
