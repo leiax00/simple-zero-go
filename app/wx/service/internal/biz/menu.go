@@ -11,7 +11,7 @@ const menu = `
     {
       "type": "view",
       "name": "开发文档",
-      "url": "https://developers.weixin.qq.com/doc"
+      "url": "https://developers.weixin.qq.com/doc/offiaccount/Getting_Started/Overview.html"
     },
     {
       "name": "菜单",

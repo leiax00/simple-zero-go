@@ -31,6 +31,5 @@ func (s *WxSysService) GetAccessToken(ctx context.Context, tokenObj *wxPb.TokenR
 }
 
 func (s *WxSysService) CreateMenu(ctx context.Context, menu *wxPb.Menu) (*wxPb.CommonReply, error) {
-	//TODO implement me
-	panic("implement me")
+	return s.uc.CreateMenu(ctx, menu)
 }

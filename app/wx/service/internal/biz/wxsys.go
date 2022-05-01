@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
+	"encoding/json"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
 	v1 "github.com/simple-zero-go/api/wx/service/v1"
@@ -47,7 +48,7 @@ func (uc *WxSysUseCase) AuthServer(ctx context.Context, data *v1.AuthServerReq) 
 }
 
 func (uc *WxSysUseCase) GetAccessToken(ctx context.Context, data *v1.TokenReq) (*v1.TokenReply, error) {
-	token, err := uc.biz.rc.Get(ctx, _const.WX_ACCESS_TOKEN).Result()
+	token, err := uc.biz.rc.Get(ctx, _const.RedisKeyAccessToken).Result()
 	if err != nil && err != redis.Nil {
 		return &v1.TokenReply{
 			AccessToken: token,
@@ -60,12 +61,24 @@ func (uc *WxSysUseCase) GetAccessToken(ctx context.Context, data *v1.TokenReq) (
 			"grant_type": utils.If(data.GrantType == "", "client_credential", data.GrantType),
 			"appid":      utils.If(data.Appid == "", uc.conf.Appid, data.Appid),
 			"secret":     utils.If(data.Secret == "", uc.conf.Secret, data.Secret),
-		}).Get("https://api.weixin.qq.com/cgi-bin/token")
+		}).Get(_const.ApiGetAccessToken)
 	if err != nil {
 		log.Info(err)
-		return nil, err
+		return &v1.TokenReply{}, err
 	}
 	reply := resp.Result().(*v1.TokenReply)
 	err = uc.repo.SaveToken(ctx, reply)
 	return reply, err
+}
+
+func (uc *WxSysUseCase) CreateMenu(ctx context.Context, m *v1.Menu) (*v1.CommonReply, error) {
+	if len(m.Button) <= 0 {
+		_ = json.Unmarshal([]byte(menu), m)
+	}
+	token, _ := uc.GetAccessToken(ctx, &v1.TokenReq{})
+	resp, err := uc.biz.hc.R().SetBody(m).
+		SetQueryParam("access_token", token.AccessToken).
+		SetResult(&v1.CommonReply{}).
+		Post(_const.ApiCreateMenu)
+	return resp.Result().(*v1.CommonReply), err
 }

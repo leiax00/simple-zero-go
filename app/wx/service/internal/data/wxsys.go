@@ -23,5 +23,5 @@ func NewWxSysRepo(data *Data, logger log.Logger) biz.WxSysRepo {
 
 func (wp WxSysRepo) SaveToken(ctx context.Context, data *v1.TokenReply) error {
 	return wp.data.rc.
-		Set(ctx, _const.WX_ACCESS_TOKEN, data.AccessToken, time.Duration(7200)*time.Second).Err()
+		Set(ctx, _const.RedisKeyAccessToken, data.AccessToken, time.Duration(7200)*time.Second).Err()
 }
