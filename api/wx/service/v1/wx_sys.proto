@@ -12,8 +12,15 @@ option java_outer_classname = "WxSysProtoV1";
 service WxSys {
   rpc AuthServer (AuthServerReq) returns (AuthServerResp) {
     option (google.api.http) = {
-      get: "/wx/v1/auth-server",
+      get: "/wx/v1/handle",
       response_body: 'echostr'
+    };
+  }
+
+  rpc DispatchMsg(MsgReq) returns (MsgReq) {
+    option (google.api.http) = {
+      post: "/wx/v1/handle",
+      body: "*",
     };
   }
 
@@ -21,6 +28,18 @@ service WxSys {
 
   rpc CreateMenu(Menu) returns (CommonReply);
 
+}
+
+message MsgReq {
+  string toUserName = 1;
+  string fromUserName = 2;
+  string createTime = 3;
+  string msgType = 4;
+  string content = 5;
+}
+
+message StringReply {
+  string msg = 1;
 }
 
 message AuthServerReq {

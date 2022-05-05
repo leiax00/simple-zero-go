@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WxSysClient interface {
 	AuthServer(ctx context.Context, in *AuthServerReq, opts ...grpc.CallOption) (*AuthServerResp, error)
+	DispatchMsg(ctx context.Context, in *MsgReq, opts ...grpc.CallOption) (*StringReply, error)
 	GetAccessToken(ctx context.Context, in *TokenReq, opts ...grpc.CallOption) (*TokenReply, error)
 	CreateMenu(ctx context.Context, in *Menu, opts ...grpc.CallOption) (*CommonReply, error)
 }
@@ -38,6 +39,15 @@ func NewWxSysClient(cc grpc.ClientConnInterface) WxSysClient {
 func (c *wxSysClient) AuthServer(ctx context.Context, in *AuthServerReq, opts ...grpc.CallOption) (*AuthServerResp, error) {
 	out := new(AuthServerResp)
 	err := c.cc.Invoke(ctx, "/wx.service.v1.WxSys/AuthServer", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *wxSysClient) DispatchMsg(ctx context.Context, in *MsgReq, opts ...grpc.CallOption) (*StringReply, error) {
+	out := new(StringReply)
+	err := c.cc.Invoke(ctx, "/wx.service.v1.WxSys/DispatchMsg", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +77,7 @@ func (c *wxSysClient) CreateMenu(ctx context.Context, in *Menu, opts ...grpc.Cal
 // for forward compatibility
 type WxSysServer interface {
 	AuthServer(context.Context, *AuthServerReq) (*AuthServerResp, error)
+	DispatchMsg(context.Context, *MsgReq) (*StringReply, error)
 	GetAccessToken(context.Context, *TokenReq) (*TokenReply, error)
 	CreateMenu(context.Context, *Menu) (*CommonReply, error)
 	mustEmbedUnimplementedWxSysServer()
@@ -78,6 +89,9 @@ type UnimplementedWxSysServer struct {
 
 func (UnimplementedWxSysServer) AuthServer(context.Context, *AuthServerReq) (*AuthServerResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AuthServer not implemented")
+}
+func (UnimplementedWxSysServer) DispatchMsg(context.Context, *MsgReq) (*StringReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DispatchMsg not implemented")
 }
 func (UnimplementedWxSysServer) GetAccessToken(context.Context, *TokenReq) (*TokenReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAccessToken not implemented")
@@ -112,6 +126,24 @@ func _WxSys_AuthServer_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WxSysServer).AuthServer(ctx, req.(*AuthServerReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WxSys_DispatchMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WxSysServer).DispatchMsg(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wx.service.v1.WxSys/DispatchMsg",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WxSysServer).DispatchMsg(ctx, req.(*MsgReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -162,6 +194,10 @@ var WxSys_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AuthServer",
 			Handler:    _WxSys_AuthServer_Handler,
+		},
+		{
+			MethodName: "DispatchMsg",
+			Handler:    _WxSys_DispatchMsg_Handler,
 		},
 		{
 			MethodName: "GetAccessToken",
