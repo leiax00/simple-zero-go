@@ -82,3 +82,9 @@ func (uc *WxSysUseCase) CreateMenu(ctx context.Context, m *v1.Menu) (*v1.CommonR
 		Post(_const.ApiCreateMenu)
 	return resp.Result().(*v1.CommonReply), err
 }
+
+func (uc *WxSysUseCase) DispatchMsg(ctx context.Context, req *v1.MsgReq) (MsgReply, error) {
+	reply := GetMsgReplyByReq(req)
+	err := reply.Reply(req)
+	return reply, err
+}

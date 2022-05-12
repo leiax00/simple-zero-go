@@ -17,10 +17,11 @@ service WxSys {
     };
   }
 
-  rpc DispatchMsg(MsgReq) returns (MsgReq) {
+  rpc DispatchMsg(MsgReq) returns (StringReply) {
     option (google.api.http) = {
       post: "/wx/v1/handle",
       body: "*",
+      response_body: "msg"
     };
   }
 
@@ -33,9 +34,26 @@ service WxSys {
 message MsgReq {
   string toUserName = 1;
   string fromUserName = 2;
-  string createTime = 3;
+  int64 createTime = 3;
   string msgType = 4;
-  string content = 5;
+  string msgId = 5;
+  //  文本信息
+  string content = 6;
+  //  图片(picUrl, mediaId)/语音(mediaId, format, recognition)/视频信息(mediaId, thumbMediaId)
+  string picUrl = 7;
+  string mediaId = 8;
+  string format = 9;
+  string recognition = 10;
+  string thumbMediaId = 11;
+  //  地理位置信息
+  string location_X = 12;
+  string location_Y = 13;
+  string scale = 14;
+  string label = 15;
+  //  链接信息
+  string title = 16;
+  string description = 17;
+  string url = 18;
 }
 
 message StringReply {
